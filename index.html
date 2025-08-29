@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网页导航</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .btn {
+            display: block;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-align: center;
+        }
+        
+        .btn-primary {
+            background-color: #4e54c8;
+            color: white;
+            box-shadow: 0 4px 14px rgba(78, 84, 200, 0.4);
+        }
+        
+        .btn-primary:hover {
+            background-color: #3f44af;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(78, 84, 200, 0.6);
+        }
+        
+        .btn-secondary {
+            background-color: #fc466b;
+            color: white;
+            box-shadow: 0 4px 14px rgba(252, 70, 107, 0.4);
+        }
+        
+        .btn-secondary:hover {
+            background-color: #e1355a;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 18px rgba(252, 70, 107, 0.6);
+        }
+        
+        .footer {
+            margin-top: 30px;
+            color: #999;
+            font-size: 14px;
+        }
+        
+        @media (min-width: 768px) {
+            .button-container {
+                flex-direction: row;
+                justify-content: center;
+            }
+            
+            .btn {
+                width: 180px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>网页导航</h1>
+        <p>请选择您要访问的网站：</p>
+        
+        <div class="button-container">
+            <a href="https://www.baidu.com" class="btn btn-primary">百度搜索</a>
+            <a href="https://www.github.com" class="btn btn-secondary">GitHub</a>
+        </div>
+        
+        <p class="footer">点击上方按钮将跳转到对应网站</p>
+    </div>
+
+    <script>
+        // 简单的点击动画效果
+        document.querySelectorAll('.btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.target.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    e.target.style.transform = '';
+                }, 200);
+            });
+        });
+    </script>
+</body>
+</html>
