@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>干员强度排行榜</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap&subset=chinese-simplified"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <link rel="stylesheet" href="./css/select.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="header">
+            <h1>干员强度排行榜</h1>
+            <div class="nav-buttons">
+                <button class="nav-btn" :class="{ active: currentRanking === 'overall' }"
+                    @click="changeRanking('overall')">综合榜</button>
+                <button class="nav-btn" :class="{ active: currentRanking === 'daily' }"
+                    @click="changeRanking('daily')">日常榜</button>
+                <button class="nav-btn" :class="{ active: currentRanking === 'counter' }"
+                    @click="changeRanking('counter')">对策榜</button>
+                <button class="nav-btn" :class="{ active: currentRanking === 'rogue' }"
+                    @click="changeRogueRanking('rogue')">肉鸽榜</button>
+                <button class="nav-btn" :class="{ active: currentRanking === 'contract' }"
+                    @click="changeRanking('contract')">合约榜</button>
+            </div>
+            <div class="rogue-sub-buttons" v-if="currentRanking === 'rogue'">
+                <button class="sub-btn" :class="{ active: rogueSubRanking === 'all' }"
+                    @click="changeRogueSubRanking('all')">总榜</button>
+                <button class="sub-btn" :class="{ active: rogueSubRanking === 'e1' }"
+                    @click="changeRogueSubRanking('e1')">精一榜</button>
+                <button class="sub-btn" :class="{ active: rogueSubRanking === 'phantom' }"
+                    @click="changeRogueSubRanking('phantom')">傀影榜</button>
+                <button class="sub-btn" :class="{ active: rogueSubRanking === 'mizuki' }"
+                    @click="changeRogueSubRanking('mizuki')">水月榜</button>
+                <button class="sub-btn" :class="{ active: rogueSubRanking === 'sami' }"
+                    @click="changeRogueSubRanking('sami')">萨米榜</button>
+                <button class="sub-btn" :class="{ active: rogueSubRanking === 'sarkaz' }"
+                    @click="changeRogueSubRanking('sarkaz')">萨卡兹榜</button>
+                <button class="sub-btn" :class="{ active: rogueSubRanking === 'boundary' }"
+                    @click="changeRogueSubRanking('boundary')">界园榜</button>
+            </div>
+        </div>
+
+        <div class="ranking-container">
+            <div class="cup-level" v-for="(operators, level) in sortedOperators" :key="level">
+                <h2 :class="getCupClass(level)" @click="toggleLevel(level)" class="cup-header">
+                    {{ level }}
+                    <span class="operator-count">({{ operators.length }}名)</span>
+                    <span class="toggle-icon">{{ expandedLevels[level] ? '−' : '+' }}</span>
+                </h2>
+                <transition name="slide-fade">
+                    <div class="operator-list" v-show="expandedLevels[level]">
+                        <div class="operator-item" v-for="operator in operators" :key="operator.name"
+                            @click="goToDetail(operator.name)">
+                            <img :src="getOperatorImage(operator.name)" :alt="operator.name" @error="handleImageError">
+                            <span>{{ operator.name }}</span>
+                            <span class="operator-score">{{ operator.score.toFixed(1) }}</span>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+        </div>
+    </div>
+
+    <script src="./script/select.js"></script>
+</body>
+
+</html>

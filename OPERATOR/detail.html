@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>明日方舟干员评分</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap&subset=chinese-simplified"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <link rel="stylesheet" href="./css/detail.css">
+</head>
+
+<body>
+    <div id="app">
+        <div class="header">
+            <img v-if="operatorName" :src="'../overall_image/operators/' + operatorName + '.png'" :alt="operatorName"
+                class="operator-image">
+            <div class="operator-info">
+                <h1 class="operator-name">{{ operatorName || '未选择干员' }}</h1>
+                <div class="overall-score" :class="getScoreClass(overallScore)">
+                    <span class="score-label">综合评分</span>
+                    <span class="score-value">{{ overallScore.toFixed(1) }}</span>
+                    <span class="cup-level">{{ getCupLevel(overallScore) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="management-buttons">
+            <button class="management-btn create-btn" @click="createOperator">新建干员</button>
+            <button class="management-btn danger" @click="deleteOperator" v-if="operatorName">删除干员</button>
+        </div>
+
+        <nav class="navbar">
+            <button class="nav-btn" :class="{ active: currentTab === 'daily' }"
+                @click="currentTab = 'daily'">日常评分</button>
+            <button class="nav-btn" :class="{ active: currentTab === 'counter' }"
+                @click="currentTab = 'counter'">对策评分</button>
+            <button class="nav-btn" :class="{ active: currentTab === 'rogue' }"
+                @click="currentTab = 'rogue'">肉鸽评分</button>
+            <button class="nav-btn" :class="{ active: currentTab === 'contract' }"
+                @click="currentTab = 'contract'">合约评分</button>
+        </nav>
+
+        <div class="content" v-if="operatorName">
+            <!-- 日常评分 -->
+            <div v-show="currentTab === 'daily'" class="tab-content">
+                <h2>日常评分</h2>
+                <div class="score-display">
+                    <span class="subtotal-label">小计评分:</span>
+                    <span class="subtotal-value" :class="getScoreClass(dailyScore)">{{ dailyScore.toFixed(1) }}</span>
+                    <span class="cup-level">{{ getCupLevel(dailyScore) }}</span>
+                    <div class="weight-control">
+                        <label>权重:</label>
+                        <input type="number" min="1" max="20" v-model.number="weights.daily" @input="updateWeights">
+                    </div>
+                </div>
+
+                <div class="score-item">
+                    <label>天赋及特性 (权重5)</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.daily.talent"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.daily.talent"
+                            @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('daily', 'talent')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.daily.talent" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.daily.talent}"></textarea>
+                </div>
+
+                <div class="score-item">
+                    <label>技能 (权重15)</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.daily.skill"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.daily.skill"
+                            @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('daily', 'skill')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.daily.skill" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.daily.skill}"></textarea>
+                </div>
+
+                <div class="score-item">
+                    <label>普攻 (权重3)</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.daily.attack"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.daily.attack"
+                            @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('daily', 'attack')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.daily.attack" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.daily.attack}"></textarea>
+                </div>
+
+                <div class="score-item">
+                    <label>使用难易度 (权重3)</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.daily.other"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.daily.other"
+                            @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('daily', 'other')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.daily.other" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.daily.other}"></textarea>
+                </div>
+            </div>
+
+            <!-- 对策评分 -->
+            <div v-show="currentTab === 'counter'" class="tab-content">
+                <h2>对策评分</h2>
+                <div class="score-display">
+                    <span class="subtotal-label">小计评分:</span>
+                    <span class="subtotal-value" :class="getScoreClass(counterScore)">{{ counterScore.toFixed(1)
+                        }}</span>
+                    <span class="cup-level">{{ getCupLevel(counterScore) }}</span>
+                    <div class="weight-control">
+                        <label>权重:</label>
+                        <input type="number" min="1" max="20" v-model.number="weights.counter" @input="updateWeights">
+                    </div>
+                </div>
+
+                <div class="score-item">
+                    <label>不可替代性 (权重3)</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.counter.irreplaceable"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.counter.irreplaceable"
+                            @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('counter', 'irreplaceable')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.counter.irreplaceable" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.counter.irreplaceable}"></textarea>
+                </div>
+
+                <div class="score-item">
+                    <label>理想上限强度 (权重2)</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.counter.ideal"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.counter.ideal"
+                            @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('counter', 'ideal')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.counter.ideal" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.counter.ideal}"></textarea>
+                </div>
+
+                <div class="score-item">
+                    <label>挂机强度 (权重1)</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.counter.afk"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.counter.afk"
+                            @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('counter', 'afk')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.counter.afk" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.counter.afk}"></textarea>
+                </div>
+            </div>
+
+            <!-- 肉鸽评分 -->
+            <div v-show="currentTab === 'rogue'" class="tab-content">
+                <h2>肉鸽评分</h2>
+                <div class="score-display">
+                    <span class="subtotal-label">小计评分:</span>
+                    <span class="subtotal-value" :class="getScoreClass(rogueScore)">{{ rogueScore.toFixed(1) }}</span>
+                    <span class="cup-level">{{ getCupLevel(rogueScore) }}</span>
+                    <div class="weight-control">
+                        <label>权重:</label>
+                        <input type="number" min="1" max="20" v-model.number="weights.rogue" @input="updateWeights">
+                    </div>
+                </div>
+
+                <div class="score-item">
+                    <label>精一强度</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.rogue.e1" @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.rogue.e1" @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('rogue', 'e1')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.rogue.e1" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.rogue.e1}"></textarea>
+                </div>
+
+                <div class="score-item">
+                    <label>傀影</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.rogue.phantom"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.rogue.phantom"
+                            @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('rogue', 'phantom')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.rogue.phantom" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.rogue.phantom}"></textarea>
+                </div>
+
+                <div class="score-item">
+                    <label>水月</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.rogue.mizuki"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.rogue.mizuki"
+                            @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('rogue', 'mizuki')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.rogue.mizuki" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.rogue.mizuki}"></textarea>
+                </div>
+
+                <div class="score-item">
+                    <label>萨米</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.rogue.sami"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.rogue.sami" @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('rogue', 'sami')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.rogue.sami" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.rogue.sami}"></textarea>
+                </div>
+
+                <div class="score-item">
+                    <label>萨卡兹</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.rogue.sarkaz"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.rogue.sarkaz"
+                            @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('rogue', 'sarkaz')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.rogue.sarkaz" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.rogue.sarkaz}"></textarea>
+                </div>
+
+                <div class="score-item">
+                    <label>界园</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.rogue.boundary"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.rogue.boundary"
+                            @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('rogue', 'boundary')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.rogue.boundary" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.rogue.boundary}"></textarea>
+                </div>
+            </div>
+
+            <!-- 合约评分 -->
+            <div v-show="currentTab === 'contract'" class="tab-content">
+                <h2>合约评分</h2>
+                <div class="score-display">
+                    <span class="subtotal-label">小计评分:</span>
+                    <span class="subtotal-value" :class="getScoreClass(contractScore)">{{ contractScore.toFixed(1)
+                        }}</span>
+                    <span class="cup-level">{{ getCupLevel(contractScore) }}</span>
+                    <div class="weight-control">
+                        <label>权重:</label>
+                        <input type="number" min="1" max="20" v-model.number="weights.contract" @input="updateWeights">
+                    </div>
+                </div>
+
+                <div class="score-item">
+                    <label>生存能力</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.contract.survival"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.contract.survival"
+                            @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('contract', 'survival')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.contract.survival" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.contract.survival}"></textarea>
+                </div>
+
+                <div class="score-item">
+                    <label>输出能力</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.contract.damage"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.contract.damage"
+                            @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('contract', 'damage')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.contract.damage" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.contract.damage}"></textarea>
+                </div>
+
+                <div class="score-item">
+                    <label>团队能力</label>
+                    <div class="score-controls">
+                        <input type="number" min="40" max="100" v-model.number="scores.contract.team"
+                            @input="updateScores">
+                        <input type="range" min="40" max="100" v-model.number="scores.contract.team"
+                            @input="updateScores">
+                    </div>
+                    <button class="toggle-reason" @click="toggleReason('contract', 'team')">显示/隐藏评分理由</button>
+                    <textarea v-model="reasons.contract.team" placeholder="评分理由..." @input="saveData"
+                        :class="{show: showReasons.contract.team}"></textarea>
+                </div>
+
+                <div class="score-item">
+                    <label>登顶记录</label>
+                    <button class="toggle-reason" @click="toggleReason('contract', 'record')">显示/隐藏记录</button>
+                    <textarea v-model="reasons.contract.record" placeholder="记录登顶情况..." @input="saveData"
+                        :class="{show: showReasons.contract.record}"></textarea>
+                </div>
+            </div>
+        </div>
+
+        <div class="no-operator" v-else>
+            <h2>当前没有选择干员</h2>
+            <button class="management-btn create-btn" @click="createOperator">新建干员</button>
+        </div>
+    </div>
+
+    <script src="./script/detail.js"></script>
+</body>
+
+</html>
